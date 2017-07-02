@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import './app-root.css';
 import { Form, FormGroup, FormControl, InputGroup, Glyphicon } from 'react-bootstrap';
-import { AUTH_HEADER, FETCH_URL, TOKEN_URL } from './constants';
+import { AUTH_HEADER, FETCH_URL, TOP_TRACKS_URL } from './constants';
+import Profile from './profile'
+import Gallery from './gallery';
 
 class AppRoot extends Component {
 
@@ -9,35 +11,48 @@ class AppRoot extends Component {
         super(props);
 
         this.state = {
-            query: ''
+            query: '',
+            artist: null,
+            tracks: []
         }
     }
 
     search() {
-        this.getAPIToken();
-        /*fetch(FETCH_URL.replace("%query%", this.state.query), {
+        fetch(FETCH_URL.replace("%query%", this.state.query), {
             method: "GET",
             headers: {
-                "Authorization": AUTH_HEADER,
-                "Content-Type": "application/x-www-form-urlencoded"
+                "Authorization": AUTH_HEADER
             }
         }).then(
-            response => {
-                console.log('response', response);
+            response => response.json()
+        ).then(
+            json => {
+                this.consumeArtistsResponse(json);
+
+                fetch(TOP_TRACKS_URL.replace("%id%", this.state.artist.id), {
+                    method: "GET",
+                    headers: {
+                        "Authorization": AUTH_HEADER
+                    }
+                }).then(
+                    response => response.json()
+                ).then(
+                    json => {
+                        this.consumeTracksResponse(json);
+                    }
+                );
             }
-        );*/
+        );
     }
 
-    getAPIToken() {
-        fetch('https://accounts.spotify.com/api/token?grant_type=client_credentials', {
-            method: 'POST',
-            headers: {
-                'Authorization': AUTH_HEADER,
-                'Content-Type': 'application/x-www-form-urlencoded',
-            }
-        })
-        .then(response => console.log(response.json()));
+    consumeArtistsResponse(response) {
+        const artist = response.artists.items[0];
+        this.setState({ artist });
+    }
 
+    consumeTracksResponse(response) {
+        const { tracks } = response;
+        this.setState({ tracks });
     }
 
     render() {
@@ -73,13 +88,20 @@ class AppRoot extends Component {
                         </InputGroup>
                     </FormGroup>
                 </Form>
-                <div className="profile">
-                    <div>Artist Picture</div>
-                    <div>Artist Name</div>
-                </div>
-                <div className="gallery">
-                    Gallery
-                </div>
+                {
+                    this.state.artist !== null
+                    ?
+                        <div>
+                            <Profile
+                                artist={this.state.artist}
+                            />
+                            <Gallery
+                                tracks={this.state.tracks}
+                            />
+                        </div>
+                    :
+                        <div></div>
+                }
             </div>
         )
     }

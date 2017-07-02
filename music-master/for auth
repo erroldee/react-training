@@ -1,0 +1,5 @@
+https://accounts.spotify.com/api/token?grant_type=client_credentials
+POST
+Headers
+    Authorization: Basic ZGE1NjViYzYyNzBiNGI3YmI4N2Y3YWRlYjBiYTNmYmU6ZTAxYzE3ZjljYmMyNGFmZGFkNzc0NjJhZjU0NWI2MjM=
+    Content-Type: application/x-www-form-urlencoded
